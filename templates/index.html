@@ -71,7 +71,7 @@
                 <button type="submit" class="btn btn-primary full">Ingresar</button>
                 <div class="form-status" id="login-status"></div>
                 <div class="login-footer">
-                    <a href="#">¿Olvidaste tu contraseña?</a>
+                    <a href="#" id="forgot-password-link">¿Olvidaste tu contraseña?</a>
                     <span>¿No tenés cuenta? <a href="/register">Registrate</a></span>
                 </div>
             </form>
@@ -99,6 +99,33 @@
         </div>
         <a class="btn btn-outline" href="https://wa.me/5491144999700" target="_blank" rel="noopener noreferrer">Contactar</a>
     </footer>
+
+    <div class="modal" id="forgot-modal" aria-hidden="true">
+        <div class="modal-backdrop" data-close="true"></div>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="forgot-title">
+            <h3 id="forgot-title">Recuperar contraseña</h3>
+            <p>Ingresá tu email y definí una nueva contraseña.</p>
+            <form class="modal-form" id="forgot-form">
+                <label>
+                    Email
+                    <input type="email" id="forgot-email" placeholder="tuemail@equipo.com" required>
+                </label>
+                <label>
+                    Nueva contraseña
+                    <input type="password" id="forgot-password" placeholder="••••••••" required>
+                </label>
+                <label>
+                    Confirmar contraseña
+                    <input type="password" id="forgot-password-confirm" placeholder="••••••••" required>
+                </label>
+                <div class="form-status" id="forgot-status"></div>
+                <div class="modal-actions">
+                    <button class="btn btn-ghost" type="button" id="forgot-close">Volver</button>
+                    <button class="btn btn-primary" type="submit">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

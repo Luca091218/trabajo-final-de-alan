@@ -85,9 +85,21 @@ const bookingTypeButtons = document.querySelectorAll(".chip[data-cancha]");
 const confirmBookingBtn = document.getElementById("confirm-booking");
 const bookingSelected = document.getElementById("booking-selected");
 const myTurnos = document.getElementById("me-turnos");
+const bookingDays = document.getElementById("booking-days");
+const cancelModal = document.getElementById("cancel-modal");
+const cancelClose = document.getElementById("cancel-close");
+const cancelConfirm = document.getElementById("cancel-confirm");
+const forgotModal = document.getElementById("forgot-modal");
+const forgotLink = document.getElementById("forgot-password-link");
+const forgotClose = document.getElementById("forgot-close");
+const forgotForm = document.getElementById("forgot-form");
+const forgotStatus = document.getElementById("forgot-status");
 
 let selectedCancha = null;
 let selectedHorario = null;
+let selectedDate = null;
+let selectedDateLabel = "";
+let pendingCancelId = null;
 
 const formatDateTime = (date) => {
     const pad = (value) => String(value).padStart(2, "0");
@@ -99,16 +111,12 @@ const formatDateTime = (date) => {
     return `${year}-${month}-${day} ${hours}:${minutes}`;
 };
 
+const getDateKey = (date) => formatDateTime(date).split(" ")[0];
+
 const buildHorario = (timeStr) => {
     const [hours, minutes] = timeStr.split(":").map(Number);
-    const now = new Date();
-    const target = new Date();
-    target.setSeconds(0, 0);
+    const target = selectedDate ? new Date(`${selectedDate}T00:00:00`) : new Date();
     target.setHours(hours, minutes, 0, 0);
-
-    if (target <= now) {
-        target.setDate(target.getDate() + 1);
-    }
 
     return formatDateTime(target);
 };
@@ -140,20 +148,36 @@ const clearSelection = () => {
     setSelectedText("Elegí un horario disponible.");
 };
 
-const markAvailability = (ocupados = []) => {
+const markAvailability = (ocupados = [], propios = []) => {
     if (!bookingGrid) {
         return;
     }
 
+    const ocupadosSet = new Set(ocupados);
+    const propiosSet = new Set(propios);
+    const todayKey = getDateKey(new Date());
+    const now = new Date();
+
     bookingGrid.querySelectorAll(".slot-btn").forEach((button) => {
         const horarioBase = button.dataset.horario;
         const horarioFull = horarioBase ? buildHorario(horarioBase) : null;
-        const isOcupado = horarioFull ? ocupados.includes(horarioFull) : false;
+        const isOcupado = horarioFull ? ocupadosSet.has(horarioFull) : false;
+        const isPropio = horarioFull ? propiosSet.has(horarioFull) : false;
+        let isPast = false;
 
-        button.disabled = isOcupado;
-        button.classList.toggle("is-occupied", isOcupado);
+        if (selectedDate && selectedDate === todayKey && horarioBase) {
+            const [hours, minutes] = horarioBase.split(":").map(Number);
+            const slotTime = new Date();
+            slotTime.setHours(hours, minutes, 0, 0);
+            isPast = slotTime <= now;
+        }
 
-        if (isOcupado) {
+        button.disabled = isOcupado || isPast;
+        button.classList.toggle("is-owned", isPropio);
+        button.classList.toggle("is-occupied", isOcupado && !isPropio);
+        button.classList.toggle("is-past", isPast);
+
+        if (isOcupado || isPast) {
             button.classList.remove("is-selected");
             if (selectedHorario === horarioBase) {
                 clearSelection();
@@ -167,7 +191,13 @@ const loadDisponibles = async () => {
         return;
     }
 
-    const response = await fetch(`/turnos/disponibles?cancha_tipo=${selectedCancha}`);
+    if (!selectedDate) {
+        return;
+    }
+
+    const response = await fetch(
+        `/turnos/disponibles?cancha_tipo=${selectedCancha}&fecha=${selectedDate}`
+    );
     const data = await response.json();
 
     if (!response.ok) {
@@ -175,7 +205,7 @@ const loadDisponibles = async () => {
         return;
     }
 
-    markAvailability(data.ocupados || []);
+    markAvailability(data.ocupados || [], data.mios || []);
 };
 
 const renderTurnos = (turnos = []) => {
@@ -255,6 +285,58 @@ if (bookingTypeButtons.length) {
     });
 }
 
+const buildDayLabel = (date, index) => {
+    if (index === 0) {
+        return "Hoy";
+    }
+    if (index === 1) {
+        return "Mañana";
+    }
+    const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
+    const dayName = dayNames[date.getDay()];
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    return `${dayName} ${day}/${month}`;
+};
+
+const renderDays = () => {
+    if (!bookingDays) {
+        return;
+    }
+
+    bookingDays.innerHTML = "";
+    const today = new Date();
+
+    for (let i = 0; i < 7; i += 1) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const dateKey = getDateKey(date);
+        const label = buildDayLabel(date, i);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "chip day-chip";
+        button.dataset.date = dateKey;
+        button.dataset.label = label;
+        button.textContent = label;
+        if (i === 0) {
+            button.classList.add("is-active");
+            selectedDate = dateKey;
+            selectedDateLabel = label;
+        }
+        button.addEventListener("click", () => {
+            bookingDays.querySelectorAll(".day-chip").forEach((item) => {
+                item.classList.remove("is-active");
+            });
+            button.classList.add("is-active");
+            selectedDate = button.dataset.date;
+            selectedDateLabel = button.dataset.label || "";
+            clearSelection();
+            loadDisponibles();
+        });
+        bookingDays.appendChild(button);
+    }
+};
+
 if (bookingGrid) {
     bookingGrid.addEventListener("click", async (event) => {
         const button = event.target.closest(".slot-btn");
@@ -281,7 +363,8 @@ if (bookingGrid) {
         if (confirmBookingBtn) {
             confirmBookingBtn.disabled = false;
         }
-        setSelectedText(`Seleccionado: F${selectedCancha} · ${horarioBase}`);
+        const label = selectedDateLabel ? ` · ${selectedDateLabel}` : "";
+        setSelectedText(`Seleccionado: F${selectedCancha} · ${horarioBase}${label}`);
     });
 }
 
@@ -330,26 +413,142 @@ if (myTurnos) {
         if (!turnoId) {
             return;
         }
+        pendingCancelId = turnoId;
+        if (cancelModal) {
+            cancelModal.classList.add("is-open");
+            cancelModal.setAttribute("aria-hidden", "false");
+        }
+    });
+}
 
-        button.disabled = true;
+const closeCancelModal = () => {
+    if (!cancelModal) {
+        return;
+    }
+    cancelModal.classList.remove("is-open");
+    cancelModal.setAttribute("aria-hidden", "true");
+    pendingCancelId = null;
+};
+
+if (cancelClose) {
+    cancelClose.addEventListener("click", closeCancelModal);
+}
+
+if (cancelModal) {
+    cancelModal.addEventListener("click", (event) => {
+        if (event.target.dataset.close === "true") {
+            closeCancelModal();
+        }
+    });
+}
+
+if (cancelConfirm) {
+    cancelConfirm.addEventListener("click", async () => {
+        if (!pendingCancelId) {
+            closeCancelModal();
+            return;
+        }
         setBookingStatus("Cancelando turno...");
-
-        const response = await fetch(`/turnos/${turnoId}`, { method: "DELETE" });
+        const response = await fetch(`/turnos/${pendingCancelId}`, { method: "DELETE" });
         const data = await response.json();
 
         if (!response.ok) {
             setBookingStatus(data.mensaje || "No se pudo cancelar el turno.", "error");
-            button.disabled = false;
             return;
         }
 
         setBookingStatus("Turno cancelado.", "success");
+        closeCancelModal();
         await loadMisTurnos();
         await loadDisponibles();
     });
 }
 
+const openForgotModal = () => {
+    if (!forgotModal) {
+        return;
+    }
+    forgotModal.classList.add("is-open");
+    forgotModal.setAttribute("aria-hidden", "false");
+    if (forgotStatus) {
+        forgotStatus.textContent = "";
+        forgotStatus.className = "form-status";
+    }
+};
+
+const closeForgotModal = () => {
+    if (!forgotModal) {
+        return;
+    }
+    forgotModal.classList.remove("is-open");
+    forgotModal.setAttribute("aria-hidden", "true");
+};
+
+if (forgotLink) {
+    forgotLink.addEventListener("click", (event) => {
+        event.preventDefault();
+        openForgotModal();
+    });
+}
+
+if (forgotClose) {
+    forgotClose.addEventListener("click", closeForgotModal);
+}
+
+if (forgotModal) {
+    forgotModal.addEventListener("click", (event) => {
+        if (event.target.dataset.close === "true") {
+            closeForgotModal();
+        }
+    });
+}
+
+if (forgotForm) {
+    forgotForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const email = document.getElementById("forgot-email").value.trim();
+        const password = document.getElementById("forgot-password").value;
+        const confirm = document.getElementById("forgot-password-confirm").value;
+
+        if (password !== confirm) {
+            if (forgotStatus) {
+                forgotStatus.textContent = "Las contraseñas no coinciden.";
+                forgotStatus.className = "form-status error";
+            }
+            return;
+        }
+
+        if (forgotStatus) {
+            forgotStatus.textContent = "Actualizando contraseña...";
+            forgotStatus.className = "form-status";
+        }
+
+        const response = await fetch("/forgot-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (forgotStatus) {
+                forgotStatus.textContent = data.mensaje || "No se pudo actualizar.";
+                forgotStatus.className = "form-status error";
+            }
+            return;
+        }
+
+        if (forgotStatus) {
+            forgotStatus.textContent = "Contraseña actualizada. Ya podés iniciar sesión.";
+            forgotStatus.className = "form-status success";
+        }
+        forgotForm.reset();
+    });
+}
+
 if (bookingGrid) {
+    renderDays();
     clearSelection();
     loadDisponibles();
     loadMisTurnos();

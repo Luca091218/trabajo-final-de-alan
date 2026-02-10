@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory, render_template, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta
 import sqlite3
 import os
 
@@ -195,6 +196,16 @@ def crear_turno():
     if cancha_tipo not in {"5", "7", "8"}:
         return jsonify({"estado": "error", "mensaje": "Tipo de cancha inválido"}), 400
 
+    try:
+        horario_dt = datetime.strptime(horario, "%Y-%m-%d %H:%M")
+    except ValueError:
+        return jsonify({"estado": "error", "mensaje": "Horario inválido"}), 400
+
+    now = datetime.now()
+    max_date = now + timedelta(days=7)
+    if horario_dt <= now or horario_dt > max_date:
+        return jsonify({"estado": "error", "mensaje": "El turno debe ser dentro de la próxima semana"}), 400
+
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute(
@@ -264,23 +275,28 @@ def listar_disponibles():
         return jsonify({"estado": "error", "mensaje": "Debés iniciar sesión"}), 401
 
     cancha_tipo = (request.args.get("cancha_tipo") or "").strip()
+    fecha = (request.args.get("fecha") or "").strip()
     if cancha_tipo not in {"5", "7", "8"}:
         return jsonify({"estado": "error", "mensaje": "Tipo de cancha inválido"}), 400
+
+    if not fecha:
+        return jsonify({"estado": "error", "mensaje": "Falta la fecha"}), 400
 
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT horario FROM turnos
-        WHERE cancha_tipo = ? AND datetime(horario) > datetime('now')
+        SELECT horario, usuario_id FROM turnos
+        WHERE cancha_tipo = ? AND date(horario) = ? AND datetime(horario) > datetime('now')
         """,
-        (cancha_tipo,)
+        (cancha_tipo, fecha)
     )
     filas = cur.fetchall()
     conn.close()
 
     horarios = [fila[0] for fila in filas]
-    return jsonify({"cancha_tipo": cancha_tipo, "ocupados": horarios})
+    propios = [fila[0] for fila in filas if fila[1] == usuario_id]
+    return jsonify({"cancha_tipo": cancha_tipo, "ocupados": horarios, "mios": propios})
 
 # Endpoint DELETE para cancelar turno
 @app.route("/turnos/<int:turno_id>", methods=["DELETE"])
@@ -304,6 +320,31 @@ def cancelar_turno(turno_id):
     conn.close()
 
     return jsonify({"estado": "ok", "mensaje": "Turno cancelado"})
+
+# Endpoint POST para recuperar contraseña (sin token)
+@app.route("/forgot-password", methods=["POST"])
+def forgot_password():
+    data = request.get_json() or {}
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+
+    if not email or not password:
+        return jsonify({"estado": "error", "mensaje": "Faltan datos"}), 400
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
+    row = cur.fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"estado": "error", "mensaje": "Email no registrado"}), 404
+
+    password_hash = generate_password_hash(password)
+    cur.execute("UPDATE usuarios SET password_hash = ? WHERE email = ?", (password_hash, email))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"estado": "ok", "mensaje": "Contraseña actualizada"})
 
 # Endpoint GET para listar turnos por usuario
 @app.route("/turnos/<int:usuario_id>", methods=["GET"])

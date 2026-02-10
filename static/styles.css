@@ -398,6 +398,12 @@ body {
 	gap: 10px;
 }
 
+.booking-days {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
 .chip {
 	padding: 8px 14px;
 	border-radius: 999px;
@@ -417,6 +423,11 @@ body {
 	background: rgba(46, 234, 121, 0.2);
 	border-color: rgba(46, 234, 121, 0.6);
 	color: var(--accent);
+}
+
+.day-chip {
+	font-size: 0.85rem;
+	padding: 8px 12px;
 }
 
 .booking-grid {
@@ -472,6 +483,18 @@ body {
 	color: rgba(233, 243, 236, 0.6);
 }
 
+.slot-btn.is-owned {
+	background: rgba(46, 234, 121, 0.22);
+	border-color: rgba(46, 234, 121, 0.6);
+	color: var(--accent);
+}
+
+.slot-btn.is-past {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.1);
+	color: rgba(233, 243, 236, 0.4);
+}
+
 .slot-btn:disabled {
 	cursor: not-allowed;
 	opacity: 0.7;
@@ -487,6 +510,81 @@ body {
 	padding: 8px 12px;
 	border-radius: 10px;
 	font-size: 0.85rem;
+}
+
+.btn-danger {
+	border-color: rgba(255, 143, 143, 0.5);
+	color: #ffb5b5;
+}
+
+.modal {
+	position: fixed;
+	inset: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	background: rgba(0, 0, 0, 0.4);
+	backdrop-filter: blur(2px);
+	z-index: 20;
+}
+
+.modal.is-open {
+	display: flex;
+}
+
+.modal-backdrop {
+	position: absolute;
+	inset: 0;
+}
+
+.modal-card {
+	position: relative;
+	background: rgba(7, 23, 11, 0.95);
+	border: 1px solid rgba(46, 234, 121, 0.2);
+	border-radius: 18px;
+	padding: 22px;
+	max-width: 420px;
+	width: 100%;
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+	display: grid;
+	gap: 12px;
+}
+
+.modal-card h3 {
+	font-size: 1.3rem;
+}
+
+.modal-card p {
+	color: var(--gray-200);
+}
+
+.modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.modal-form {
+	display: grid;
+	gap: 12px;
+}
+
+.modal-form label {
+	display: grid;
+	gap: 6px;
+	font-size: 0.85rem;
+	color: var(--gray-200);
+}
+
+.modal-form input {
+	padding: 12px 14px;
+	border-radius: 10px;
+	border: 1px solid rgba(46, 234, 121, 0.15);
+	background: rgba(5, 5, 5, 0.6);
+	color: var(--gray-100);
+	outline: none;
 }
 
 .muted {
