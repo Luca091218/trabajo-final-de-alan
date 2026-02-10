@@ -2,33 +2,104 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Registros</title>
+    <title>Reservá tu turno | Fútbol 5</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    <div class="bg-glow"></div>
+    <header class="topbar">
+        <div class="brand">
+            <span class="brand-ball">⚽</span>
+            <span class="brand-name">Liga de Canchas</span>
+        </div>
+        <div class="topbar-actions">
+            <nav class="nav">
+                <a href="/">Home</a>
+                <a href="#canchas">Canchas</a>
+                <a href="#contacto">Contacto</a>
 
-<h1>Gestión de Registros</h1>
+                {% if session.get('user_id') %}
+                <a href="/me">Mi perfil</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
 
-<h2>Insertar nuevo registro</h2>
+    <main class="hero" id="turnos">
+        <section class="hero-copy">
+            <div class="tag">Fútbol • Reserva rápida • 24/7</div>
+            <h1>Reservá tu turno ahora</h1>
+            <p>
+                Elegí cancha, horario y equipo en segundos. Jugá como un campeón
+                con confirmación inmediata.
+            </p>
+            <div class="hero-actions">
+                <button class="btn btn-primary">Quiero reservar</button>
+                <button class="btn btn-ghost">Ver canchas</button>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-number">+120</span>
+                    <span class="stat-label">Turnos semanales</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">5</span>
+                    <span class="stat-label">Canchas premium</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">4.9★</span>
+                    <span class="stat-label">Calificación</span>
+                </div>
+            </div>
+        </section>
 
-<form id="form">
-    <input type="text" id="nombre" placeholder="Nombre" required>
-    <input type="number" id="valor" placeholder="Valor" required>
-    <button type="submit">Insertar</button>
-</form>
+        <aside class="login-card" id="login">
+            <div class="card-header">
+                <h2>Ingresá para continuar</h2>
+                <p>Iniciá sesión para gestionar tus reservas.</p>
+            </div>
+            <form class="login-form" id="login-form">
+                <label>
+                    Email
+                    <input type="email" id="login-email" placeholder="tuemail@equipo.com" required>
+                </label>
+                <label>
+                    Contraseña
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </label>
+                <button type="submit" class="btn btn-primary full">Ingresar</button>
+                <div class="form-status" id="login-status"></div>
+                <div class="login-footer">
+                    <a href="#">¿Olvidaste tu contraseña?</a>
+                    <span>¿No tenés cuenta? <a href="/register">Registrate</a></span>
+                </div>
+            </form>
+        </aside>
+    </main>
 
-<h2>Listado</h2>
+    <section class="features" id="canchas">
+        <div class="feature">
+            <h3>Césped impecable</h3>
+            <p>Superficie profesional con drenaje rápido y líneas reglamentarias.</p>
+        </div>
+        <div class="feature">
+            <h3>Iluminación LED</h3>
+            <p>Jugá de noche con visibilidad total y ambiente de estadio.</p>
+        </div>
+        <div class="feature">
+            <h3>Vestuario cómodo</h3>
+            <p>Duchas, lockers y espacio para tu equipo antes y después del partido.</p>
+        </div>
+    </section>
 
-<table border="1" cellpadding="5">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Valor</th>
-        </tr>
-    </thead>
-    <tbody id="tabla"></tbody>
-</table>
+    <footer class="footer" id="contacto">
+        <div>
+            <strong>¿Listos para jugar?</strong> Reservá tu turno y salí a la cancha.
+        </div>
+        <a class="btn btn-outline" href="https://wa.me/5491144999700" target="_blank" rel="noopener noreferrer">Contactar</a>
+    </footer>
 
-<script src="/script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

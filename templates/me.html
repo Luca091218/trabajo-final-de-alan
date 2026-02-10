@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi perfil | Fútbol 5</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <header class="topbar">
+        <div class="brand">
+            <span class="brand-ball">⚽</span>
+            <span class="brand-name">Liga de Canchas</span>
+        </div>
+        <div class="topbar-actions">
+            <nav class="nav">
+                <a href="/">Inicio</a>
+                <a href="/me">Mi perfil</a>
+            </nav>
+            <button class="btn btn-outline" id="logout-btn">Cerrar sesión</button>
+        </div>
+    </header>
+
+    <main class="me-layout">
+        <section class="me-card">
+            <h1>Mi perfil</h1>
+            <p class="muted">Resumen básico de tu cuenta.</p>
+            <div class="me-info">
+                <div>
+                    <span class="label">Nombre</span>
+                    <span class="value">{{ usuario.nombre }}</span>
+                </div>
+                <div>
+                    <span class="label">Email</span>
+                    <span class="value">{{ usuario.email }}</span>
+                </div>
+                <div>
+                    <span class="label">Miembro desde</span>
+                    <span class="value">{{ usuario.created_at }}</span>
+                </div>
+            </div>
+            <button class="btn btn-primary">Editar perfil</button>
+        </section>
+
+        <section class="me-card booking-card">
+            <h2>Reservar turno</h2>
+            <p class="muted">Seleccioná el tipo de cancha y el horario disponible.</p>
+            <div class="booking">
+                <div class="booking-types" id="booking-types">
+                    <button class="chip is-active" type="button" data-cancha="5">F5</button>
+                    <button class="chip" type="button" data-cancha="7">F7</button>
+                    <button class="chip" type="button" data-cancha="8">F8</button>
+                </div>
+                <div class="booking-grid" id="booking-grid">
+                    <button class="slot-btn" type="button" data-horario="10:00">10:00</button>
+                    <button class="slot-btn" type="button" data-horario="12:00">12:00</button>
+                    <button class="slot-btn" type="button" data-horario="14:00">14:00</button>
+                    <button class="slot-btn" type="button" data-horario="16:00">16:00</button>
+                    <button class="slot-btn" type="button" data-horario="18:00">18:00</button>
+                    <button class="slot-btn" type="button" data-horario="20:00">20:00</button>
+                    <button class="slot-btn" type="button" data-horario="22:00">22:00</button>
+                </div>
+                <div class="booking-actions">
+                    <button class="btn btn-primary" id="confirm-booking" type="button" disabled>Confirmar turno</button>
+                    <span class="booking-selected" id="booking-selected">Elegí un horario disponible.</span>
+                </div>
+                <div class="form-status" id="booking-status"></div>
+            </div>
+        </section>
+
+        <section class="me-card">
+            <h2>Próximos turnos</h2>
+            <p class="muted">Vista rápida de tus reservas.</p>
+            <div class="me-turnos" id="me-turnos">
+                {% if turnos %}
+                    {% for turno in turnos %}
+                    <div class="turno-item">
+                        <div>
+                            <span class="value">{{ turno.nombre_reserva }}</span>
+                            <span class="label">Reservado a tu nombre</span>
+                        </div>
+                        <div class="turno-actions">
+                            <span class="badge">F{{ turno.cancha_tipo }} · {{ turno.horario }}</span>
+                            <button class="btn btn-outline btn-small cancel-btn" type="button" data-turno-id="{{ turno.id }}">Cancelar</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="muted">No tenés turnos por el momento.</p>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div>
+            <strong>¿Necesitás ayuda?</strong> Escribinos y coordinamos tu reserva.
+        </div>
+        <a class="btn btn-outline" href="https://wa.me/5491144999700" target="_blank" rel="noopener noreferrer">Contactar</a>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

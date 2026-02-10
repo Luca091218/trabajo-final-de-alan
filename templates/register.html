@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro | Fútbol 5</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <header class="topbar">
+        <div class="brand">
+            <span class="brand-ball">⚽</span>
+            <span class="brand-name">Liga de Canchas</span>
+        </div>
+        <div class="topbar-actions">
+            <nav class="nav">
+                <a href="/">Inicio</a>
+                <a href="/register">Registro</a>
+            </nav>
+            <button class="btn btn-outline">Ingresar</button>
+        </div>
+    </header>
+
+    <main class="auth-layout">
+        <section class="auth-card">
+            <div class="card-header">
+                <h1>Creá tu cuenta</h1>
+                <p>Registrate para reservar tu turno y gestionar tus partidos.</p>
+            </div>
+            <form class="login-form" id="register-form">
+                <label>
+                    Nombre completo
+                    <input type="text" id="register-nombre" placeholder="Tu nombre" required>
+                </label>
+                <label>
+                    Email
+                    <input type="email" id="register-email" placeholder="tuemail@equipo.com" required>
+                </label>
+                <label>
+                    Contraseña
+                    <input type="password" id="register-password" placeholder="••••••••" required>
+                </label>
+                <label>
+                    Confirmar contraseña
+                    <input type="password" id="register-password-confirm" placeholder="••••••••" required>
+                </label>
+                <button type="submit" class="btn btn-primary full">Crear cuenta</button>
+                <div class="form-status" id="register-status"></div>
+                <div class="login-footer">
+                    <span>¿Ya tenés cuenta? <a href="/">Iniciar sesión</a></span>
+                </div>
+            </form>
+        </section>
+
+        <section class="auth-card highlight">
+            <h2>Beneficios de registrarte</h2>
+            <ul class="auth-list">
+                <li>Reservas rápidas y confirmación inmediata.</li>
+                <li>Historial de partidos y próximos turnos.</li>
+                <li>Acceso a promociones y horarios especiales.</li>
+            </ul>
+            <button class="btn btn-ghost">Ver canchas</button>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div>
+            <strong>¿Tenés dudas?</strong> Te ayudamos a crear tu cuenta.
+        </div>
+        <a class="btn btn-outline" href="https://wa.me/5491144999700" target="_blank" rel="noopener noreferrer">Contactar</a>
+    </footer>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
