@@ -8,19 +8,16 @@ import os
 app = Flask(__name__, template_folder="../templates", static_folder="../static", static_url_path="")
 app.secret_key = "khHFHJKAJKSHDjksnmsnajshjksskksd"
 
-# Ruta absoluta del directorio actual
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Ruta a la base de datos SQLite
 DB_PATH = os.path.join(BASE_DIR, "..", "database", "registros.db")
 
-# Helper para conexión a SQLite
+#Conexión a SQLite
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
-# Función que crea la base y las tablas si no existen
+#Crea la base de datos y las tablas si no existen
 def inicializar_base():
     db_folder = os.path.join(BASE_DIR, "..", "database")
     if not os.path.exists(db_folder):
@@ -28,8 +25,6 @@ def inicializar_base():
 
     conn = get_db_connection()
     cur = conn.cursor()
-
-
     cur.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -378,4 +373,4 @@ def script_js():
 # Punto de entrada de la aplicación
 if __name__ == "__main__":
     inicializar_base()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

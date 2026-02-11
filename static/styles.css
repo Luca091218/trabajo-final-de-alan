@@ -387,6 +387,41 @@ body {
 	margin-bottom: 8px;
 }
 
+.price-banner {
+	margin: 8px 0 18px;
+	padding: 12px 18px;
+	border-radius: 16px;
+	background: linear-gradient(90deg, rgba(11, 42, 21, 0.9), rgba(31, 191, 98, 0.2));
+	border: 1px solid rgba(46, 234, 121, 0.25);
+	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 16px;
+	position: relative;
+	z-index: 2;
+}
+
+.price-banner__title {
+	font-weight: 700;
+	letter-spacing: 0.3px;
+}
+
+.price-banner__items {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.price-pill {
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: rgba(5, 5, 5, 0.5);
+	border: 1px solid rgba(46, 234, 121, 0.2);
+	font-weight: 600;
+	color: var(--accent);
+}
+
 .booking {
 	display: grid;
 	gap: 14px;
